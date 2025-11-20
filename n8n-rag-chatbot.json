@@ -1,0 +1,370 @@
+{
+  "name": "testproject",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        16
+      ],
+      "id": "667c18ef-dbd8-40f7-b72c-da4451e7bb26",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "27e8e3b5-1d02-4d79-888b-64348cb2a7d3",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "content": "## DOSYA YÜKLEME\n",
+        "height": 432,
+        "width": 1280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -64
+      ],
+      "id": "fc06c0a9-7966-4574-81a1-ba2d48a1cecf",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. GİRDİ: Önceki düğümden gelen veriyi 'text' olarak alıyoruz (Düzeltilen Kısım)\n// Eğer sol panelde verin 'data' veya başka bir isimdeyse burayı ona göre değiştir.\nconst inputText = $input.first().json.text;\n\n// 2. AYIRMA (REGEX): Nokta, ünlem veya soru işaretinden sonra gelen \n// ve BÜYÜK HARFLE (Türkçe karakterler dahil) başlayan cümleleri yakalar.\nconst sentenceRegex = /(?<=[.?!])\\s+(?=[A-ZİĞÜŞÖÇ])/gm;\n\n// Metin yoksa hata vermemesi için kontrol\nif (!inputText) {\n  // Eğer burası çalışıyorsa, veri 'text' isminde gelmiyor demektir.\n  return [];\n}\n\nconst sentences = inputText\n  .toString() \n  .split(sentenceRegex)\n  .map(s => s.trim())\n  .filter(s => s.length > 0);\n\n// 3. BİRLEŞTİRME AYARLARI\nconst outputChunks = [];\nlet currentChunk = \"\";\nlet sentenceCount = 0;\nconst maxSentences = 3;\nconst maxLength = 500;\n\n// 4. DÖNGÜ\nfor (let sentence of sentences) {\n  const nextChunk = currentChunk ? `${currentChunk} ${sentence}` : sentence;\n\n  if (sentenceCount < maxSentences && nextChunk.length < maxLength) {\n    currentChunk = nextChunk;\n    sentenceCount += 1;\n  } else {\n    if (currentChunk) {\n      outputChunks.push(currentChunk.trim());\n    }\n    currentChunk = sentence;\n    sentenceCount = 1;\n  }\n}\n\nif (currentChunk) {\n  outputChunks.push(currentChunk.trim());\n}\n\n// 5. ÇIKTI: pageContent formatında döndür\nreturn outputChunks.map((chunk, index) => ({\n  json: {\n    text: chunk,\n    metadata: {\n        index: index\n    }\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        16
+      ],
+      "id": "1d46e1b5-2c7c-4991-8e4e-7c6b203d4f7c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        16
+      ],
+      "id": "e35c109e-7873-4e70-9899-318091793f41",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Z2zt8dFSBn2kS182",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## YAPAY ZEKA AJANI\n\n",
+        "height": 432,
+        "width": 1280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -528
+      ],
+      "id": "6f2d2360-1316-457d-90a0-60b4d1ae717d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        -320
+      ],
+      "id": "f7b75ce7-081a-42b1-8d00-8dff9d6c1719",
+      "name": "When chat message received",
+      "webhookId": "9475e479-e64b-41f1-a3e4-ad93cb320da1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Sen n8n otomasyon platformu konusunda uzmanlaşmış, yardımsever ve profesyonel bir teknik destek asistanısın.\n\nGÖREVİN:\nKullanıcının n8n ile ilgili sorularını, YALNIZCA sana sağlanan \"Bağlam\" (Context) bilgisini kullanarak cevaplamaktır.\n\nKURALLAR:\n1. Sadece sana verilen metindeki bilgileri kullan. Kendi genel bilgine dayanarak cevap verme.\n2. Cevap verirken n8n terminolojisine (Node, Workflow, Trigger, JSON, Binary Data vb.) sadık kal.\n3. İletişim dilin her zaman saygılı, profesyonel ve nazik olsun. Asla küfür, hakaret, argo veya saldırgan ifadeler kullanma.\n4. Eğer kullanıcının sorduğu sorunun cevabı sana verilen metinlerde YOKSA, sakın uydurma veya tahmin yürütme. Böyle bir durumda tam olarak şu cümleyi kur: \"Bu konuda elimdeki bilgi bankasında yeterli veri bulunmamaktadır.\"\n5. Cevapların öğretici, net ve Türkçe olsun.\n\nBİLGİ ALANIN:\nn8n nedir, temel kavramlar, veri yapısı (JSON/Binary), kritik node'lar (HTTP Request, Switch, Merge vb.), kurulum ve hata yönetimi."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        -320
+      ],
+      "id": "f7ee3838-f35e-46b5-a41a-4f5bfe2b8009",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -480
+      ],
+      "id": "82f140aa-cac2-4409-a2bf-54357a07f62d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i8MrVbow3ksYqJqZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search the database",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        -368
+      ],
+      "id": "e3b3c662-96f0-47ce-9dc1-af67dc1b6f21",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Z2zt8dFSBn2kS182",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        192,
+        208
+      ],
+      "id": "160200a6-def9-48cf-940b-a47a7c3f2a30",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i8MrVbow3ksYqJqZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -192
+      ],
+      "id": "399f2e7f-2c9b-41f1-ae78-1aeaca403bf6",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i8MrVbow3ksYqJqZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "19Ahy4h71CSUi8gD30O2uQvz0aHVxU3-k",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "3e90f6f7-0071-493b-b076-f352c670ce46",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "eR68rIujS3o0Fy33",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        224
+      ],
+      "id": "12defbbe-c6bb-4a60-bb74-4f374fe6ac97",
+      "name": "Default Data Loader"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "971e6227-1cf4-43a1-8c56-1c9202f40b18",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3503415dd3adccc80cd4b3381fae7b667a93b170a3f31a2cfcc0a0ff0b91d4a"
+  },
+  "id": "lvqgUvoaDHlJUo5o",
+  "tags": []
+}
