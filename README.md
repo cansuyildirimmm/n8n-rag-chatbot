@@ -23,7 +23,7 @@ Kullanıcının soru sorduğu canlı sistemdir.
 
 <img width="756" height="570" alt="Ekran görüntüsü 2025-11-21 013749" src="https://github.com/user-attachments/assets/4f703aff-0689-42c5-85ba-38fa654880b7" />
 
-<img width="575" height="437" alt="Ekran görüntüsü 2025-11-21 013835" src="https://github.com/user-attachments/assets/c2c5ecd0-8a18-4e00-ba67-703b6b4d00d8" />
+          <img width="575" height="437" alt="Ekran görüntüsü 2025-11-21 013835" src="https://github.com/user-attachments/assets/c2c5ecd0-8a18-4e00-ba67-703b6b4d00d8" />
 
 
 
