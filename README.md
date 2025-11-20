@@ -1,6 +1,6 @@
 # 🤖 n8n RAG Chatbot
 
-Bu proje, RepoCloud altyapısı üzerinde barındırılan n8n otomasyon platformu kullanılarak geliştirilmiş, Retrieval-Augmented Generation (RAG) mimarisine sahip bir yapay zeka chatbot uygulamasıdır.
+Bu proje RepoCloud altyapısı üzerinde barındırılan n8n otomasyon platformu kullanılarak geliştirilmiş, Retrieval-Augmented Generation (RAG) mimarisine sahip bir yapay zeka chatbot uygulamasıdır.
 
 Proje belirli bir teknik dokümantasyonu (PDF) analiz eder, verileri vektörel hale getirerek **Supabase** üzerinde saklar ve kullanıcıların bu dokümanla ilgili sorularını **Google Gemini** dil modeli aracılığıyla cevaplar.
 
