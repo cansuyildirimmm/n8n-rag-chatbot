@@ -2,7 +2,7 @@
 
 Bu proje, **n8n** otomasyon platformunu kullanarak oluşturulmuş, **Retrieval-Augmented Generation (RAG)** mimarisine sahip bir yapay zeka chatbot uygulamasıdır.
 
-Proje, belirli bir teknik dokümantasyonu (PDF) analiz eder, verileri vektörel hale getirerek **Supabase** üzerinde saklar ve kullanıcıların bu dokümanla ilgili sorularını **Google Gemini** dil modeli aracılığıyla cevaplar.
+Proje belirli bir teknik dokümantasyonu (PDF) analiz eder, verileri vektörel hale getirerek **Supabase** üzerinde saklar ve kullanıcıların bu dokümanla ilgili sorularını **Google Gemini** dil modeli aracılığıyla cevaplar.
 
 Proje iki ana iş akışından (workflow) oluşmaktadır:
 
